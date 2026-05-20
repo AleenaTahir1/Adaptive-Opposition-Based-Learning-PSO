@@ -1,0 +1,70 @@
+% Per-generation control flow for AO-PSO.
+% Re-laid as a strictly vertical pipeline so no arrow strikes through
+% any node. The "yes" branch of the Jr check produces a generation
+% jump that re-joins the main flow before the stagnation check; the
+% "no" branch skips the jump.
+
+\begin{tikzpicture}[
+    font=\footnotesize,
+    node distance=4mm and 7mm,
+    every node/.append style={align=center},
+    proc/.style={
+        draw=aopsoBlue, fill=aopsoLight, rounded corners=2pt,
+        minimum width=42mm, minimum height=8mm,
+    },
+    dec/.style={
+        diamond, aspect=2.6, draw=aopsoRed, fill=aopsoRed!10,
+        inner sep=1pt, minimum width=36mm, minimum height=9mm,
+    },
+    io/.style={
+        draw=aopsoGreen, fill=aopsoGreen!10, rounded corners=8pt,
+        minimum width=34mm, minimum height=7mm,
+    },
+    arrow/.style={-{Latex[length=2.2mm,width=2mm]}, thick},
+    edgelabel/.style={font=\scriptsize, fill=white, inner sep=1pt},
+]
+
+\node[io] (start) {\textbf{Begin generation $t$}};
+\node[proc, below=of start] (vel)
+     {Update velocity (constriction PSO\\$+$ rebel-repulsion term VA-6)};
+\node[proc, below=of vel] (move) {Move particles, clip to $[a,b]$};
+\node[proc, below=of move] (eval) {Evaluate $f(X)$,\ \  charge $N$ FEs};
+\node[proc, below=of eval] (pbest) {Update $p_i$, $g$, stagnation $s_i$};
+\node[proc, below=of pbest] (diam)
+     {Compute swarm diameter $\sigma_t$\\then $\jrt = \jrmax(1-e^{-\lambda\sigma_t})$};
+
+\node[dec, below=of diam] (jrcheck) {$U(0,1) < \jrt$\,?};
+\node[proc, below=of jrcheck] (jump)
+     {\textbf{VA-3} Generation jump:\\GOBL on $X$, evaluate, keep $\hat x_i$ if better};
+
+\node[dec, below=of jump] (stagcheck) {any $s_i \geq t_{\text{stag}}$\,?};
+\node[proc, below=of stagcheck] (oppost)
+     {\textbf{VA-5} pbest opposition:\\GOBL on $p_i$, replace if better};
+
+\node[dec, below=of oppost] (budget) {FE used $\geq$ budget?};
+\node[io,  below=of budget] (stop) {Return $g$};
+
+% --- main vertical flow --------------------------------------------------
+\draw[arrow] (start)     -- (vel);
+\draw[arrow] (vel)       -- (move);
+\draw[arrow] (move)      -- (eval);
+\draw[arrow] (eval)      -- (pbest);
+\draw[arrow] (pbest)     -- (diam);
+\draw[arrow] (diam)      -- (jrcheck);
+
+% --- jr decision: yes -> generation jump; no -> skip to stag check -------
+\draw[arrow] (jrcheck)   -- node[edgelabel,right] {yes} (jump);
+\draw[arrow] (jrcheck.east) -- ++(8mm,0) |- (stagcheck.east)
+            node[edgelabel, pos=0.18] {no};
+\draw[arrow] (jump)      -- (stagcheck);
+\draw[arrow] (stagcheck) -- node[edgelabel, right] {yes/no} (oppost);
+\draw[arrow] (oppost)    -- (budget);
+
+% --- budget decision -----------------------------------------------------
+\draw[arrow] (budget)    -- node[edgelabel, right] {yes} (stop);
+
+% Return arrow on the LEFT side so it stays inside the column.
+\draw[arrow] (budget.west) -- ++(-7mm,0) |- (vel.west)
+             node[edgelabel, pos=0.05] {no, $t\!\leftarrow\!t{+}1$};
+
+\end{tikzpicture}

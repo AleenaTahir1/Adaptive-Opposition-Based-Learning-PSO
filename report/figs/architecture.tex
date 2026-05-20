@@ -1,0 +1,97 @@
+% Architecture diagram for AO-PSO.
+% Shows the seven value additions sitting inside the two stages of the
+% algorithm (Initialisation and Adaptive Evolution).
+% The stage rectangles are rendered on the background layer so they do
+% NOT paint over the component nodes. The feedback dashed arrow is
+% routed entirely outside the boxes so it does not strike through any
+% component.
+
+\begin{tikzpicture}[
+    font=\footnotesize,
+    node distance=5mm and 6mm,
+    stage/.style={
+        draw=aopsoBlue, very thick, rounded corners=4pt,
+        inner sep=10pt,
+    },
+    component/.style={
+        draw=aopsoBlue, rounded corners=3pt, fill=white,
+        minimum width=29mm, minimum height=10mm,
+        align=center,
+    },
+    novel/.style={
+        draw=aopsoRed, rounded corners=3pt, fill=aopsoRed!15,
+        minimum width=29mm, minimum height=10mm,
+        align=center, very thick,
+    },
+    arrow/.style={-{Latex[length=2mm,width=1.8mm]}, thick},
+    fadearrow/.style={-{Latex[length=2mm]}, draw=aopsoGray, dashed, thick},
+    label/.style={font=\footnotesize\bfseries, color=aopsoBlue},
+]
+
+% ---------- Stage 1: initialisation (top row) ---------------------------
+\node[component] (chaos)  {\textbf{VA-1}\\Chaotic Init\\\scriptsize logistic, $\mu{=}4$};
+\node[component, right=of chaos] (gobl0)
+       {\textbf{VA-2}\\Generalized OBL\\\scriptsize $\hat x = a{+}b{-}\beta x{-}(1{-}\beta)\bar x$};
+\node[component, right=of gobl0]  (sel)
+       {Select best $N$\\of $2N$ candidates};
+
+% ---------- Stage 2: adaptive evolution (rows below) --------------------
+\node[component, below=12mm of chaos] (psoupd)
+       {Constriction PSO\\velocity \& move};
+\node[component, right=of psoupd] (rebel)
+       {\textbf{VA-6}\\Rebel Repulsion\\\scriptsize $-\alpha(p_{\text{worst}}{-}x_i)$};
+\node[component, right=of rebel]  (eval)
+       {Evaluate swarm\\$f(X)$};
+
+\node[component, below=of psoupd] (sigma)
+       {Swarm diameter\\$\sigma_t = \mathrm{std}/\mathrm{width}$};
+\node[novel,     right=of sigma]  (adapt)
+       {\textbf{VA-4 NOVEL}\\Adaptive $J_r^{(t)}$\\\scriptsize $=J_{r,\max}(1{-}e^{-\lambda\sigma_t})$};
+\node[component, right=of adapt]  (jump)
+       {\textbf{VA-3} Gen.\ Jumping\\\scriptsize if $U(0,1) < J_r^{(t)}$};
+
+\node[component, below=of sigma] (stag)
+       {\textbf{VA-5} pbest opp.\\\scriptsize if $s_i \geq t_{\text{stag}}$};
+\node[component, right=of stag]  (upd)
+       {Update $p_i$, $g$, $s_i$};
+\node[component, right=of upd]   (fe)
+       {\textbf{VA-7} FE budget\\\& Wilcoxon test};
+
+% ---------- background stage rectangles --------------------------------
+\begin{scope}[on background layer]
+  \node[stage, fill=aopsoLight,
+        fit=(chaos)(gobl0)(sel)] (init) {};
+  \node[stage, fill=aopsoLight!60,
+        fit=(psoupd)(rebel)(eval)(sigma)(adapt)(jump)(stag)(upd)(fe)] (evo) {};
+\end{scope}
+
+% stage labels
+\node[label] at ([yshift=2.5mm]init.north) {Stage 1 -- Initialisation};
+\node[label] at ([yshift=2.5mm]evo.north)  {Stage 2 -- Adaptive Evolution Loop};
+
+% ---------- arrows ------------------------------------------------------
+\draw[arrow] (chaos) -- (gobl0);
+\draw[arrow] (gobl0) -- (sel);
+
+% Stage 1 -> Stage 2 entry: out the bottom of init, into psoupd
+\draw[arrow] (sel.south) |- ([yshift=4mm]psoupd.north) -- (psoupd.north);
+
+\draw[arrow] (psoupd) -- (rebel);
+\draw[arrow] (rebel)  -- (eval);
+\draw[arrow] (eval.south) |- ([yshift=4mm]sigma.north) -- (sigma.north);
+\draw[arrow] (sigma) -- (adapt);
+\draw[arrow] (adapt) -- (jump);
+\draw[arrow] (jump.south) |- ([yshift=4mm]stag.north) -- (stag.north);
+\draw[arrow] (stag) -- (upd);
+\draw[arrow] (upd)  -- (fe);
+
+% Feedback loop routed COMPLETELY outside the Stage 2 box.
+% Goes: fe.south -> down -> all the way left -> up -> back into psoupd.west.
+\coordinate (feA) at ([yshift=-7mm]fe.south);
+\coordinate (feB) at ([xshift=-7mm,yshift=-7mm]evo.south west);
+\coordinate (feC) at ([xshift=-7mm]psoupd.west);
+\draw[fadearrow] (fe.south) -- (feA) -- (feB) -- (feC) -- (psoupd.west);
+\node[label, color=aopsoGray, font=\scriptsize\itshape]
+      at ($(feA)!0.5!(feB)$) [above] {next iteration};
+
+\end{tikzpicture}

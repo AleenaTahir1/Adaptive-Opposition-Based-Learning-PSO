@@ -1,0 +1,34 @@
+# Python ---------------------------------------------------------------
+__pycache__/
+*.py[cod]
+*.pyo
+.pytest_cache/
+
+# LaTeX intermediates --------------------------------------------------
+*.aux
+*.log
+*.out
+*.toc
+*.synctex.gz
+*.bbl
+*.blg
+*.fls
+*.fdb_latexmk
+*.lof
+*.lot
+
+# Office lock files ----------------------------------------------------
+~$*
+
+# Large generated artefacts (regenerate by running experiments.py) -----
+results/trajectories.pkl
+
+# Third-party reference template (not ours to redistribute) -----------
+Copy of Sales Growth Strategy Slides.pptx
+
+# Editor/OS junk -------------------------------------------------------
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp
