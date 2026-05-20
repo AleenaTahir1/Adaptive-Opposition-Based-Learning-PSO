@@ -1,6 +1,6 @@
 # AO-PSO — Adaptive Opposition-Based Particle Swarm Optimization
 
-Final-phase project for the *Swarm Intelligence* course at the National University of Technology. We took the focal paper *O-PSO* (Jabeen, Jalil & Baig, GECCO 2009) and rebuilt it into a modern, statistically-validated optimizer.
+We took the focal paper *O-PSO* (Jabeen, Jalil & Baig, GECCO 2009) and rebuilt it into a modern, statistically-validated optimizer.
 
 ## Why this project
 
@@ -93,7 +93,7 @@ Requirements: Python 3.12 with `numpy`, `scipy`, `pandas`, `matplotlib`, `python
 
 | Roll | Name | Responsibility |
 |-----:|------|----------------|
-|  1   | Aleena Tahir   | IEEE compilation, formatting |
+|  1   | Aleena Tahir   | IEEE compilation, Implementation|
 | 10   | Eman Asghar    | Architecture and flowchart diagrams |
 | 20   | Aena Habib     | Value-addition lead, methodology design |
 | 22   | Malaika Akhter | Abstract, introduction, conclusion |
